@@ -152,7 +152,7 @@ h1, h2, h3, h4 {
 }
 
 .nav-links a {
-  color: var(--text-light);
+  color: #000;
   text-decoration: none;
   font-size: 0.95rem;
   font-weight: 500;
@@ -563,7 +563,7 @@ h1, h2, h3, h4 {
 /* LEFT STICKY HEADER */
 .guard-editorial-left {
   position: sticky;
-  top: 120px;
+  top: 180px;
 }
 
 .guard-editorial-left .section-mark {
