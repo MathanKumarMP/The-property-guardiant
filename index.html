@@ -63,6 +63,7 @@
           </button>
         </div>
 
+        <!-- Banner Dots Buttons (Commented out)
         <div class="banner-dots" id="banner-dots">
           <button type="button" class="banner-dot active" data-index="0" aria-label="Slide 1"></button>
           <button type="button" class="banner-dot" data-index="1" aria-label="Slide 2"></button>
@@ -70,6 +71,7 @@
           <button type="button" class="banner-dot" data-index="3" aria-label="Slide 4"></button>
           <button type="button" class="banner-dot" data-index="4" aria-label="Slide 5"></button>
         </div>
+        -->
       </div>
     </header>
 
@@ -1766,15 +1768,17 @@
       document.addEventListener('DOMContentLoaded', function () {
         const slides = document.querySelectorAll('.banner-slider .slide');
         const dotsContainer = document.getElementById('banner-dots');
-        if (!slides.length || !dotsContainer) return;
+        if (!slides.length) return;
 
-        const dots = dotsContainer.querySelectorAll('.banner-dot');
+        const dots = dotsContainer ? dotsContainer.querySelectorAll('.banner-dot') : [];
         let currentSlide = 0;
         let slideTimer = null;
 
         function goToSlide(index) {
           slides.forEach((s, i) => s.classList.toggle('active', i === index));
-          dots.forEach((d, i) => d.classList.toggle('active', i === index));
+          if (dots && dots.length) {
+            dots.forEach((d, i) => d.classList.toggle('active', i === index));
+          }
           currentSlide = index;
         }
 
@@ -1788,12 +1792,14 @@
           slideTimer = setInterval(nextSlide, 5000);
         }
 
-        dots.forEach((dot, idx) => {
-          dot.addEventListener('click', () => {
-            goToSlide(idx);
-            startAutoPlay();
+        if (dots && dots.length) {
+          dots.forEach((dot, idx) => {
+            dot.addEventListener('click', () => {
+              goToSlide(idx);
+              startAutoPlay();
+            });
           });
-        });
+        }
 
         startAutoPlay();
       });
