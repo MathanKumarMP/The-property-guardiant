@@ -131,6 +131,10 @@ document.addEventListener('DOMContentLoaded', function () {
       document.querySelectorAll('#popup-form .has-error, #fg-privacy.has-error').forEach(function (el) {
         el.classList.remove('has-error');
       });
+      document.querySelectorAll('.location-dropdown').forEach(function (d) {
+        d.classList.remove('is-open');
+        d.innerHTML = '';
+      });
       var defaultRadio = document.querySelector('input[name="preferred_contact"][value="Request a call back"]');
       if (defaultRadio) {
         defaultRadio.checked = true;
@@ -202,7 +206,8 @@ document.addEventListener('DOMContentLoaded', function () {
       }
 
       // 4. Location: Required
-      if (!locationSelect || !locationSelect.value) {
+      var locationVal = locationSelect ? locationSelect.value.trim() : '';
+      if (!locationVal) {
         document.getElementById('fg-location').classList.add('has-error');
         isValid = false;
         if (!firstInvalidElement) firstInvalidElement = locationSelect;
@@ -308,7 +313,8 @@ document.addEventListener('DOMContentLoaded', function () {
       }
 
       // 4. Location: Required
-      if (!locationSelect || !locationSelect.value) {
+      var locationVal = locationSelect ? locationSelect.value.trim() : '';
+      if (!locationVal) {
         document.getElementById('bf-fg-location').classList.add('has-error');
         isValid = false;
         if (!firstInvalidElement) firstInvalidElement = locationSelect;
@@ -521,4 +527,184 @@ document.addEventListener('DOMContentLoaded', function () {
 
     startAutoPlay();
   }
+
+  // Live Location Autocomplete (OpenStreetMap / Photon - 100% Free, No API Key needed)
+  function setupLocationAutocomplete(inputId, errorGroupId) {
+    var input = document.getElementById(inputId);
+    if (!input) return;
+
+    var container = input.closest('.input-with-icon');
+    if (!container) return;
+
+    var dropdown = document.createElement('div');
+    dropdown.className = 'location-dropdown';
+    container.appendChild(dropdown);
+
+    var debounceTimer = null;
+    var currentAbortController = null;
+    var selectedIndex = -1;
+    var currentItems = [];
+
+    function closeDropdown() {
+      dropdown.classList.remove('is-open');
+      dropdown.innerHTML = '';
+      selectedIndex = -1;
+      currentItems = [];
+    }
+
+    input.addEventListener('input', function () {
+      var query = input.value.trim();
+      clearTimeout(debounceTimer);
+
+      if (query.length < 2) {
+        closeDropdown();
+        return;
+      }
+
+      debounceTimer = setTimeout(function () {
+        if (currentAbortController) {
+          try { currentAbortController.abort(); } catch (err) {}
+        }
+        if (typeof AbortController !== 'undefined') {
+          currentAbortController = new AbortController();
+        }
+
+        dropdown.innerHTML = '<div class="location-loading">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;animation:spin 1s linear infinite;"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10"></path></svg>' +
+          'Searching locations...</div>';
+        dropdown.classList.add('is-open');
+
+        var url = 'https://photon.komoot.io/api/?q=' + encodeURIComponent(query) + '&limit=6&lat=11.1271&lon=78.6569';
+        var fetchOpts = currentAbortController ? { signal: currentAbortController.signal } : {};
+
+        fetch(url, fetchOpts)
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            dropdown.innerHTML = '';
+            selectedIndex = -1;
+            currentItems = [];
+
+            if (!data || !data.features || data.features.length === 0) {
+              dropdown.innerHTML = '<div class="location-loading" style="color:#94a3b8;">No matching places found. You can still type your location.</div>';
+              return;
+            }
+
+            var seen = new Set();
+            var places = [];
+
+            data.features.forEach(function (f) {
+              var props = f.properties || {};
+              var name = props.name || '';
+              if (!name) return;
+
+              var parts = [];
+              if (props.city && props.city !== name) parts.push(props.city);
+              if (props.district && props.district !== name && props.district !== props.city) parts.push(props.district);
+              if (props.state) parts.push(props.state);
+              else if (props.country) parts.push(props.country);
+
+              var subText = parts.join(', ');
+              var fullLabel = subText ? (name + ', ' + subText) : name;
+              var key = fullLabel.toLowerCase();
+
+              if (!seen.has(key)) {
+                seen.add(key);
+                places.push({ name: name, sub: subText, full: fullLabel });
+              }
+            });
+
+            if (places.length === 0) {
+              dropdown.innerHTML = '<div class="location-loading" style="color:#94a3b8;">No matching places found. You can still type your location.</div>';
+              return;
+            }
+
+            places.slice(0, 5).forEach(function (item) {
+              var div = document.createElement('div');
+              div.className = 'location-item';
+              div.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>' +
+                '<circle cx="12" cy="10" r="3"></circle>' +
+                '</svg>' +
+                '<div class="location-item-text">' +
+                '<span class="location-item-name">' + escapeHtml(item.name) + '</span>' +
+                (item.sub ? '<span class="location-item-sub">(' + escapeHtml(item.sub) + ')</span>' : '') +
+                '</div>';
+
+              div.addEventListener('click', function () {
+                input.value = item.full;
+                if (typeof clearModalError === 'function') {
+                  clearModalError(errorGroupId);
+                }
+                closeDropdown();
+              });
+
+              dropdown.appendChild(div);
+              currentItems.push({ element: div, full: item.full });
+            });
+          })
+          .catch(function (err) {
+            if (err && err.name !== 'AbortError') {
+              closeDropdown();
+            }
+          });
+      }, 250);
+    });
+
+    input.addEventListener('keydown', function (e) {
+      if (!dropdown.classList.contains('is-open') || currentItems.length === 0) return;
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        selectedIndex = (selectedIndex + 1) % currentItems.length;
+        updateSelection();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        selectedIndex = (selectedIndex - 1 + currentItems.length) % currentItems.length;
+        updateSelection();
+      } else if (e.key === 'Enter') {
+        if (selectedIndex >= 0 && selectedIndex < currentItems.length) {
+          e.preventDefault();
+          input.value = currentItems[selectedIndex].full;
+          if (typeof clearModalError === 'function') {
+            clearModalError(errorGroupId);
+          }
+          closeDropdown();
+        }
+      } else if (e.key === 'Escape') {
+        closeDropdown();
+      }
+    });
+
+    function updateSelection() {
+      currentItems.forEach(function (it, idx) {
+        if (idx === selectedIndex) {
+          it.element.classList.add('is-selected');
+          it.element.scrollIntoView({ block: 'nearest' });
+        } else {
+          it.element.classList.remove('is-selected');
+        }
+      });
+    }
+
+    document.addEventListener('click', function (e) {
+      if (!container.contains(e.target)) {
+        closeDropdown();
+      }
+    });
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>'"]/g, function (tag) {
+      return ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+      }[tag] || tag);
+    });
+  }
+
+  setupLocationAutocomplete('modal-location', 'fg-location');
+  setupLocationAutocomplete('bf-location', 'bf-fg-location');
 });
