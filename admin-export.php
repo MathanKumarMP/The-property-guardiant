@@ -1,0 +1,384 @@
+<?php
+/**
+ * ==============================================================================
+ * The Property Guardian - Secure Direct Excel/CSV Exporter
+ * ==============================================================================
+ * Flow:
+ *  - Official Brand Logo: assets/logo-color.png
+ *  - Enter Email Address & Password
+ *  - Click "Download Excel (.csv)"
+ *  - If credentials are CORRECT -> Immediately downloads the .csv file
+ *  - If credentials are WRONG   -> Shows clear error alert
+ * ==============================================================================
+ */
+
+date_default_timezone_set('Asia/Kolkata');
+
+// -----------------------------------------------------------------------------
+// 1. SET YOUR ADMIN CREDENTIALS HERE
+// -----------------------------------------------------------------------------
+define('PROJECT_NAME', 'The Property Guardian');
+define('ADMIN_EMAIL', 'admin@propertyguardian.com'); // Admin Email
+define('ADMIN_PASSWORD', 'Admin@2026');             // Admin Password
+define('DATA_FILE', __DIR__ . '/submissions.json');
+
+$errorMessage = '';
+
+// -----------------------------------------------------------------------------
+// 2. FORM SUBMISSION & DIRECT DOWNLOAD HANDLER
+// -----------------------------------------------------------------------------
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $inputEmail    = trim($_POST['email'] ?? '');
+    $inputPassword = trim($_POST['password'] ?? '');
+
+    // Validate credentials
+    if ($inputEmail === ADMIN_EMAIL && $inputPassword === ADMIN_PASSWORD) {
+        // Read submissions data
+        $submissions = [];
+        if (file_exists(DATA_FILE)) {
+            $content = file_get_contents(DATA_FILE);
+            $decoded = json_decode($content, true);
+            if (is_array($decoded)) {
+                $submissions = $decoded;
+            }
+        }
+
+        // Generate Filename
+        $safeProjectName = preg_replace('/[^a-zA-Z0-9_-]/', '', str_replace(' ', '', PROJECT_NAME));
+        $dateStamp = date('Y-m-d');
+        $filename = "{$safeProjectName}_Submissions_{$dateStamp}.csv";
+
+        // Send HTTP Download Headers
+        header('Content-Type: text/csv; charset=UTF-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+
+        $output = fopen('php://output', 'w');
+
+        // Output UTF-8 BOM for Microsoft Excel & Tamil text compatibility
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+
+        // CSV Column Headers
+        $headers = [
+            'S.No',
+            'Submission ID',
+            'Date & Time (IST)',
+            'Full Name',
+            'Phone Number',
+            'Email Address',
+            'Property Location',
+            'Property Type',
+            'Owner Status',
+            'Preferred Contact Mode',
+            'Requirement / Message',
+            'IP Address'
+        ];
+        fputcsv($output, $headers);
+
+        // Output Data Rows (Newest first)
+        $sno = 1;
+        $reversed = array_reverse($submissions);
+        foreach ($reversed as $row) {
+            $csvRow = [
+                $sno++,
+                $row['id'] ?? 'N/A',
+                $row['timestamp'] ?? (($row['date'] ?? '') . ' ' . ($row['time'] ?? '')),
+                $row['name'] ?? 'N/A',
+                $row['phone'] ?? 'N/A',
+                $row['email'] ?? 'N/A',
+                $row['location'] ?? 'N/A',
+                $row['property_type'] ?? 'N/A',
+                $row['owner_status'] ?? 'N/A',
+                $row['preferred_contact'] ?? 'N/A',
+                str_replace(["\r", "\n"], ' ', $row['requirement'] ?? ''),
+                $row['ip_address'] ?? 'N/A'
+            ];
+            fputcsv($output, $csvRow);
+        }
+
+        fclose($output);
+        exit;
+    } else {
+        $errorMessage = 'Invalid Email Address or Password. Access denied.';
+    }
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><?php echo htmlspecialchars(PROJECT_NAME); ?> &mdash; Download Leads</title>
+  <link rel="icon" type="image/png" href="assets/logo-color.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #080d1a;
+      --bg-card: #0f172a;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-emerald: #10b981;
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      -webkit-font-smoothing: antialiased;
+      position: relative;
+    }
+
+    /* Ambient Glow */
+    .bg-glow {
+      position: fixed;
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 700px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(201, 158, 71, 0.15) 0%, rgba(16, 185, 129, 0.1) 40%, rgba(8, 13, 26, 0) 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Centered Download Card */
+    .export-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 44px 38px;
+      width: 100%;
+      max-width: 460px;
+      text-align: center;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.6);
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .export-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #c99e47, #10b981, #38bdf8);
+    }
+
+    /* White Logo Container */
+    .logo-box {
+      background: #ffffff;
+      padding: 14px 22px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 22px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    .logo-box img {
+      height: 52px;
+      width: auto;
+      object-fit: contain;
+      display: block;
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+    }
+
+    .card-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 26px;
+    }
+
+    /* Error Alert */
+    .alert-error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      color: #fca5a5;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 22px;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Input Fields */
+    .form-group {
+      text-align: left;
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #cbd5e1;
+      margin-bottom: 8px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 13px 15px;
+      background: #1e293b;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      color: #ffffff;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .form-control:focus {
+      border-color: #10b981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+      background: #1e293b;
+    }
+
+    /* Download Excel Button */
+    .btn-download {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 16px 20px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 700;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35);
+      transition: all 0.2s ease;
+      margin-top: 10px;
+    }
+
+    .btn-download:hover {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(16, 185, 129, 0.45);
+    }
+
+    .btn-download:active {
+      transform: translateY(0);
+    }
+
+    .btn-download svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2.2;
+    }
+
+    .info-note {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+    footer {
+      margin-top: 24px;
+      font-size: 12px;
+      color: #475569;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-glow"></div>
+
+  <div class="export-card">
+    <!-- Official Logo -->
+    <div class="logo-box">
+      <img src="assets/logo-color.png" alt="The Property Guardian">
+    </div>
+
+    <h1 class="card-title"><?php echo htmlspecialchars(PROJECT_NAME); ?></h1>
+    <p class="card-subtitle">Enter credentials to download form submissions</p>
+
+    <!-- Error Message -->
+    <?php if (!empty($errorMessage)): ?>
+      <div class="alert-error">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+        <span><?php echo htmlspecialchars($errorMessage); ?></span>
+      </div>
+    <?php endif; ?>
+
+    <!-- Direct Download Form -->
+    <form method="POST" action="admin-export.php">
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input 
+          type="email" 
+          id="email" 
+          name="email" 
+          class="form-control" 
+          required 
+          placeholder="admin@propertyguardian.com"
+          value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>"
+          autocomplete="username"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input 
+          type="password" 
+          id="password" 
+          name="password" 
+          class="form-control" 
+          required 
+          placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
+          autocomplete="current-password"
+        >
+      </div>
+
+      <button type="submit" class="btn-download">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        Download Excel (.csv)
+      </button>
+    </form>
+
+    <p class="info-note">
+      Exports all leads in UTF-8 BOM format. Fully compatible with Microsoft Excel &amp; Apple Numbers.
+    </p>
+  </div>
+
+  <footer>
+    &copy; <?php echo date('Y'); ?> <?php echo htmlspecialchars(PROJECT_NAME); ?>
+  </footer>
+</body>
+</html>

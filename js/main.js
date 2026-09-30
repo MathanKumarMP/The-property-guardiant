@@ -257,14 +257,52 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
       }
 
-      // Open Thank You page in a new tab
-      window.open('thank-you.html', '_blank');
-
-      // Close and reset modal on the main page
-      if (propertyModal) {
-        propertyModal.classList.remove('active');
+      // Submit via fetch to send-mail.php with loading state
+      var submitBtn = popupForm.querySelector('button[type="submit"]');
+      var originalBtnHtml = submitBtn ? submitBtn.innerHTML : 'SUBMIT REQUIREMENT';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Submitting...';
       }
-      setTimeout(resetModalForm, 300);
+
+      var payload = {
+        name: nameVal,
+        phone: mobileVal,
+        email: emailVal,
+        location: locationVal,
+        property_type: propertyTypeSelect ? propertyTypeSelect.value : '',
+        owner: ownerSelect ? ownerSelect.value : '',
+        preferred_contact: contactModeChecked ? contactModeChecked.value : 'Phone / Call',
+        requirement: reqVal
+      };
+
+      fetch('send-mail.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        window.open('thank-you.html', '_blank');
+        if (propertyModal) {
+          propertyModal.classList.remove('active');
+        }
+        setTimeout(resetModalForm, 300);
+      })
+      .catch(function(err) {
+        console.error('Submission error:', err);
+        window.open('thank-you.html', '_blank');
+        if (propertyModal) {
+          propertyModal.classList.remove('active');
+        }
+        setTimeout(resetModalForm, 300);
+      })
+      .finally(function() {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnHtml;1
+        }
+      });
     });
   }
 
@@ -362,10 +400,46 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
       }
 
-      // Open PDF in new tab
-      // Open Thank You page in a new tab
-      window.open('thank-you.html', '_blank');
-      brochureForm.reset();
+      // Submit via fetch to send-mail.php with loading state
+      var submitBtn = brochureForm.querySelector('button[type="submit"]');
+      var originalBtnHtml = submitBtn ? submitBtn.innerHTML : 'DOWNLOAD BROCHURE';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Submitting...';
+      }
+
+      var payload = {
+        name: nameVal,
+        phone: mobileVal,
+        email: emailVal,
+        location: locationVal,
+        property_type: propertyTypeSelect ? propertyTypeSelect.value : '',
+        owner: ownerSelect ? ownerSelect.value : '',
+        preferred_contact: contactModeChecked ? contactModeChecked.value : 'Phone / Call',
+        requirement: reqVal
+      };
+
+      fetch('send-mail.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        window.open('thank-you.html', '_blank');
+        brochureForm.reset();
+      })
+      .catch(function(err) {
+        console.error('Brochure submission error:', err);
+        window.open('thank-you.html', '_blank');
+        brochureForm.reset();
+      })
+      .finally(function() {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnHtml;
+        }
+      });
     });
   }
 
