@@ -27,7 +27,13 @@
   <body>
     <!-- Site Header / Banner -->
     <header class="banner-container">
-      <div class="banner-bg"></div>
+      <div class="banner-slider">
+        <div class="slide active" style="background-image: url('assets/01-1.png');"></div>
+        <div class="slide" style="background-image: url('assets/01.png');"></div>
+        <div class="slide" style="background-image: url('assets/02-1.png');"></div>
+        <div class="slide" style="background-image: url('assets/03.png');"></div>
+        <div class="slide" style="background-image: url('assets/02.png');"></div>
+      </div>
       <div class="banner-overlay"></div>
       <nav class="banner-nav">
         <a href="#top" class="nav-brand">
@@ -44,10 +50,8 @@
       </nav>
       <div class="banner-hero-content">
         <div class="banner-hero-text">
-          <h1 class="banner-title">MANAGE YOUR PROPERTY<br />IN TAMILNADU</h1>
-          <!-- <p class="banner-description">We visit your property, photograph every room and boundary, and deliver a full
-          report within 72 hours — every month, without being asked. For NRI families across the UK, Canada, UAE,
-          Singapore, Malaysia and USA.</p> -->
+          <h1 class="banner-title">We Guard Your Property Like Our Own,<br />That's Property Guardian</h1>
+          <p class="banner-description">We manage, maintain and protect your property with trusted support, regular care and transparent coordination &mdash; giving you peace of mind when you're miles away.</p>
         </div>
         <div class="banner-actions">
           <button
@@ -57,6 +61,14 @@
           >
             Enquiry
           </button>
+        </div>
+
+        <div class="banner-dots" id="banner-dots">
+          <button type="button" class="banner-dot active" data-index="0" aria-label="Slide 1"></button>
+          <button type="button" class="banner-dot" data-index="1" aria-label="Slide 2"></button>
+          <button type="button" class="banner-dot" data-index="2" aria-label="Slide 3"></button>
+          <button type="button" class="banner-dot" data-index="3" aria-label="Slide 4"></button>
+          <button type="button" class="banner-dot" data-index="4" aria-label="Slide 5"></button>
         </div>
       </div>
     </header>
@@ -1230,17 +1242,10 @@
                   <div class="form-group" id="bf-fg-property-type">
                     <label>Property Type <span class="req">*</span></label>
                     <div class="input-with-icon select-wrap">
-                      <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                      >
-                        <path
-                          d="M3 9l9-7 9 7v11a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2z"
-                        ></path>
-                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                      </svg>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg>
                       <select
                         id="bf-property-type"
                         onchange="clearModalError('bf-fg-property-type')"
@@ -1615,17 +1620,10 @@
               <div class="form-group" id="fg-property-type">
                 <label>Property Type <span class="req">*</span></label>
                 <div class="input-with-icon select-wrap">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                  >
-                    <path
-                      d="M3 9l9-7 9 7v11a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2z"
-                    ></path>
-                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                  </svg>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg>
                   <select
                     id="modal-property-type"
                     onchange="clearModalError('fg-property-type')"
@@ -1762,5 +1760,43 @@
     </div>
 
     <script src="js/main.js?v=9.0"></script>
+  
+    <!-- Banner Dots Auto & Click Script -->
+    <script id="banner-dots-slider-script">
+      document.addEventListener('DOMContentLoaded', function () {
+        const slides = document.querySelectorAll('.banner-slider .slide');
+        const dotsContainer = document.getElementById('banner-dots');
+        if (!slides.length || !dotsContainer) return;
+
+        const dots = dotsContainer.querySelectorAll('.banner-dot');
+        let currentSlide = 0;
+        let slideTimer = null;
+
+        function goToSlide(index) {
+          slides.forEach((s, i) => s.classList.toggle('active', i === index));
+          dots.forEach((d, i) => d.classList.toggle('active', i === index));
+          currentSlide = index;
+        }
+
+        function nextSlide() {
+          let next = (currentSlide + 1) % slides.length;
+          goToSlide(next);
+        }
+
+        function startAutoPlay() {
+          if (slideTimer) clearInterval(slideTimer);
+          slideTimer = setInterval(nextSlide, 5000);
+        }
+
+        dots.forEach((dot, idx) => {
+          dot.addEventListener('click', () => {
+            goToSlide(idx);
+            startAutoPlay();
+          });
+        });
+
+        startAutoPlay();
+      });
+    </script>
   </body>
 </html>

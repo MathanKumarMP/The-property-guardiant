@@ -257,16 +257,14 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
       }
 
-      // If valid, show success confirmation
-      popupForm.style.display = 'none';
-      if (modalSuccess) {
-        modalSuccess.classList.add('active');
-        var successMsg = document.getElementById('modal-success-msg');
-        var selectedMode = contactModeChecked ? contactModeChecked.value : 'Call Back';
-        if (successMsg) {
-          successMsg.textContent = 'Thank you, ' + nameVal + '! Your property requirement has been recorded (Selected: ' + selectedMode + '). Our team in Tamilnadu will connect with you on +91 ' + mobileVal + ' shortly.';
-        }
+      // Open Thank You page in a new tab
+      window.open('thank-you.html', '_blank');
+
+      // Close and reset modal on the main page
+      if (propertyModal) {
+        propertyModal.classList.remove('active');
       }
+      setTimeout(resetModalForm, 300);
     });
   }
 
@@ -365,17 +363,8 @@ document.addEventListener('DOMContentLoaded', function () {
       }
 
       // Open PDF in new tab
-      window.open('assets/The_Property_Guardian_Brochure.pdf', '_blank');
-
-      // Show success message inside card
-      var successBox = document.getElementById('bf-success-msg');
-      var successText = document.getElementById('bf-success-text');
-      var selectedMode = contactModeChecked ? contactModeChecked.value : 'Call Back';
-      if (successBox && successText) {
-        successText.textContent = 'Thank you, ' + nameVal + '! Your brochure download has started. Our team will contact you via ' + selectedMode + ' on +91 ' + mobileVal + ' shortly.';
-        successBox.style.display = 'flex';
-      }
-
+      // Open Thank You page in a new tab
+      window.open('thank-you.html', '_blank');
       brochureForm.reset();
     });
   }

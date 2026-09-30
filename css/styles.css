@@ -183,17 +183,7 @@ h6 {
   color: var(--text-light);
 }
 
-.banner-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: url("../assets/luxury_cliff_house.jpg");
-  background-size: cover;
-  background-position: center;
-  z-index: 1;
-}
+
 
 .banner-overlay {
   position: absolute;
@@ -201,13 +191,7 @@ h6 {
   left: 0;
   width: 100%;
   height: 100%;
-  background:
-    radial-gradient(
-      circle at 50% 50%,
-      rgba(8, 22, 40, 0.52) 0%,
-      rgba(8, 22, 40, 0.78) 100%
-    ),
-    linear-gradient(to top, rgba(5, 14, 25, 0.8) 0%, transparent 60%);
+  background:radial-gradient(circle at 50% 50%, rgba(8, 22, 40, 0.52) 0%, rgb(8 22 40 / 41%) 100%), linear-gradient(to top, rgb(5 14 25 / 57%) 0%, transparent 60%);
   z-index: 2;
 }
 
@@ -329,11 +313,11 @@ h6 {
 
 .banner-hero-content {
   position: absolute;
-  top: 55%;
+  top: 68%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 90%;
-  max-width: 860px;
+  max-width: 1100px;
   z-index: 10;
   display: flex;
   flex-direction: column;
@@ -395,7 +379,7 @@ h6 {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  background: linear-gradient(135deg, #d4af37 0%, #c59a3f 60%, #b3842c 100%);
+  background: rgb(15, 49, 90);
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 6px;
@@ -1751,7 +1735,7 @@ h6 {
 /* Right Side Form Card */
 .cb-card {
   position: relative;
-  background: #ffffff;
+  background: rgb(248 246 240);
   border-radius: 16px;
   padding: 34px 36px 30px 36px;
   color: #1e293b;
@@ -2339,7 +2323,7 @@ h6 {
   font-size: 13px;
   font-family: var(--sans);
   color: #1e293b;
-  background: #f8fafc;
+  background: #f8fafcde;
   height: 36px;
   box-sizing: border-box;
   transition:
@@ -2957,7 +2941,7 @@ h6 {
   .banner-hero-content {
     left: 50%;
     transform: translate(-50%, -50%);
-    top: 56%;
+    top: 66%;
     width: 92%;
     max-width: 580px;
     text-align: center;
@@ -3096,4 +3080,322 @@ h6 {
   to { transform: rotate(360deg); }
 }
 
+/* ====================================================
+   THANK YOU PAGE (MODAL STYLE OVER BLURRED BACKGROUND)
+==================================================== */
+.ty-page-wrapper {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  font-family: var(--sans);
+}
 
+/* Header Navbar matching image */
+.ty-navbar {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  background: #ffffff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.ty-nav-container {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0.75rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ty-nav-brand img {
+  height: 52px;
+  width: auto;
+  object-fit: contain;
+}
+
+.ty-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.ty-nav-links a {
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: color 0.2s ease;
+}
+
+.ty-nav-links a:hover {
+  color: #c98a2c;
+}
+
+.ty-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #d49a38, #b88225);
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 0.84rem;
+  font-weight: 700;
+  padding: 0.65rem 1.4rem;
+  border-radius: 50px;
+  box-shadow: 0 4px 14px rgba(184, 130, 37, 0.35);
+  transition: all 0.25s ease;
+}
+
+.ty-nav-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(184, 130, 37, 0.45);
+  color: #ffffff;
+}
+
+/* Blurred Background Hero */
+.ty-hero-area {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  min-height: calc(100vh - 75px);
+  overflow: hidden;
+}
+
+.ty-bg-image {
+  position: absolute;
+  top: -15px;
+  left: -15px;
+  right: -15px;
+  bottom: -15px;
+  background-image: url("../assets/luxury_cliff_house.jpg");
+  background-size: cover;
+  background-position: center;
+  filter: blur(8px) brightness(0.65);
+  transform: scale(1.05);
+  z-index: 1;
+}
+
+.ty-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 25, 45, 0.45);
+  z-index: 2;
+}
+
+/* Centered White Card */
+.ty-card {
+  position: relative;
+  z-index: 5;
+  width: 100%;
+  max-width: 520px;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 42px 38px 38px;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.15);
+  animation: tyPopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes tyPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Top Accent Line */
+.ty-card-accent {
+  position: absolute;
+  top: 0;
+  left: 24px;
+  right: 24px;
+  height: 4px;
+  background: linear-gradient(90deg, #d49a38, #b88225);
+  border-radius: 4px 4px 0 0;
+}
+
+/* Center Checkmark Badge */
+.ty-icon-circle {
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #d49a38, #b88225);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 22px rgba(184, 130, 37, 0.35);
+}
+
+.ty-icon-circle svg {
+  width: 36px;
+  height: 36px;
+}
+
+/* Heading: Thank You! (Classic Serif font like the screenshot) */
+.ty-heading {
+  font-family: Georgia, "Playfair Display", "Times New Roman", serif;
+  font-size: 2.35rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 8px;
+  letter-spacing: -0.01em;
+}
+
+/* Subheading: Enquiry Submitted! (Warm Amber/Gold) */
+.ty-subheading {
+  font-family: var(--sans);
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #c98a2c;
+  margin: 0 0 18px;
+  letter-spacing: 0.01em;
+}
+
+/* Description paragraph */
+.ty-desc {
+  font-size: 0.95rem;
+  color: #64748b;
+  line-height: 1.6;
+  max-width: 400px;
+  margin: 0 auto 30px;
+}
+
+/* Pill Close Button */
+.ty-close-btn {
+  display: inline-block;
+  background: linear-gradient(135deg, #d49a38, #b88225);
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 0.96rem;
+  font-weight: 700;
+  padding: 12px 52px;
+  border-radius: 50px;
+  box-shadow: 0 8px 20px rgba(184, 130, 37, 0.35);
+  transition: all 0.25s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.ty-close-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(184, 130, 37, 0.45);
+  color: #ffffff;
+}
+
+@media (max-width: 900px) {
+  .ty-nav-links {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .ty-card {
+    padding: 34px 22px 28px;
+    border-radius: 18px;
+  }
+  .ty-heading {
+    font-size: 1.9rem;
+  }
+  .ty-subheading {
+    font-size: 1.15rem;
+  }
+  .ty-desc {
+    font-size: 0.88rem;
+  }
+  .ty-nav-container {
+    padding: 0.6rem 1rem;
+  }
+  .ty-nav-brand img {
+    height: 44px;
+  }
+  .ty-nav-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.78rem;
+  }
+}
+
+
+
+.banner-slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.banner-slider .slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.8s ease-in-out, visibility 0.8s ease-in-out;
+  z-index: 1;
+}
+
+.banner-slider .slide.active {
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 2 !important;
+}
+
+
+/* Banner Dots Styling - Directly below ENQUIRY button */
+.banner-dots {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 25px;
+  z-index: 50;
+  position: relative;
+}
+
+.banner-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.45);
+  border: 2px solid #ffffff;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.35s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  outline: none;
+}
+
+.banner-dot:hover {
+  background: #ffffff;
+  transform: scale(1.25);
+}
+
+.banner-dot.active {
+  background: #ffffff;
+  border-color: #ffffff;
+  width: 34px;
+  border-radius: 20px;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.85);
+}
