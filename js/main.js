@@ -473,12 +473,33 @@ document.addEventListener('DOMContentLoaded', function () {
       })
       .then(function(res) { return res.json(); })
       .then(function(data) {
-        window.open('thank-you.html', '_blank');
+        // Trigger Brochure PDF download
+        var dl = document.createElement('a');
+        dl.href = 'assets/The_Property_Guardian_Brochure.pdf';
+        dl.download = 'The_Property_Guardian_Brochure.pdf';
+        document.body.appendChild(dl);
+        dl.click();
+        setTimeout(function() {
+          if (dl.parentNode) dl.parentNode.removeChild(dl);
+        }, 300);
+
+        // Open Thank You page in new tab
+        window.open('thank-you.html?download=brochure', '_blank');
         brochureForm.reset();
       })
       .catch(function(err) {
         console.error('Brochure submission error:', err);
-        window.open('thank-you.html', '_blank');
+        // Still trigger download & open thank you page
+        var dl = document.createElement('a');
+        dl.href = 'assets/The_Property_Guardian_Brochure.pdf';
+        dl.download = 'The_Property_Guardian_Brochure.pdf';
+        document.body.appendChild(dl);
+        dl.click();
+        setTimeout(function() {
+          if (dl.parentNode) dl.parentNode.removeChild(dl);
+        }, 300);
+
+        window.open('thank-you.html?download=brochure', '_blank');
         brochureForm.reset();
       })
       .finally(function() {

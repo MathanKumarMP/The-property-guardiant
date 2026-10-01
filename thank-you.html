@@ -17,7 +17,7 @@
       rel="stylesheet"
     />
     <link rel="icon" type="image/png" href="assets/logo-color.png" />
-    <link rel="stylesheet" href="css/styles.css?v=34.0" />
+    <link rel="stylesheet" href="css/styles.css?v=37.0" />
   </head>
 
   <body>
@@ -49,11 +49,22 @@
             href="index.html"
             class="ty-close-btn"
             id="ty-close-btn"
-            
-            >Close</a
-          >
+          >Close</a>
         </div>
       </section>
     </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        var params = new URLSearchParams(window.location.search);
+        if (params.get('download') === 'brochure') {
+          var subHeading = document.getElementById('ty-subheading');
+          var desc = document.getElementById('ty-desc');
+
+          if (subHeading) subHeading.textContent = 'Enquiry Submitted!';
+          if (desc) desc.textContent = 'We have received your enquiry. Our representative will get in touch with you shortly.';
+        }
+      });
+    </script>
   </body>
 </html>
