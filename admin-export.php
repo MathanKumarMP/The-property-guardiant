@@ -63,7 +63,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // CSV Column Headers
         $headers = [
             'S.No',
-            'Submission ID',
             'Date & Time (IST)',
             'Full Name',
             'Phone Number',
@@ -72,8 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'Property Type',
             'Owner Status',
             'Preferred Contact Mode',
-            'Requirement / Message',
-            'IP Address'
+            'Requirement / Message'
         ];
         fputcsv($output, $headers);
 
@@ -83,7 +81,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         foreach ($reversed as $row) {
             $csvRow = [
                 $sno++,
-                $row['id'] ?? 'N/A',
                 $row['timestamp'] ?? (($row['date'] ?? '') . ' ' . ($row['time'] ?? '')),
                 $row['name'] ?? 'N/A',
                 $row['phone'] ?? 'N/A',
@@ -92,8 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $row['property_type'] ?? 'N/A',
                 $row['owner_status'] ?? 'N/A',
                 $row['preferred_contact'] ?? 'N/A',
-                str_replace(["\r", "\n"], ' ', $row['requirement'] ?? ''),
-                $row['ip_address'] ?? 'N/A'
+                str_replace(["\r", "\n"], ' ', $row['requirement'] ?? '')
             ];
             fputcsv($output, $csvRow);
         }
@@ -331,14 +327,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <!-- Error Message -->
     <?php if (!empty($errorMessage)): ?>
-      <div class="alert-error">
+      <div class="alert-error" id="error-alert">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
         <span><?php echo htmlspecialchars($errorMessage); ?></span>
       </div>
     <?php endif; ?>
 
     <!-- Direct Download Form -->
-    <form method="POST" action="admin-export.php">
+    <form method="POST" action="admin-export.php" id="export-form">
       <div class="form-group">
         <label for="email">Email Address</label>
         <input 
@@ -355,30 +351,80 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       <div class="form-group">
         <label for="password">Password</label>
-        <input 
-          type="password" 
-          id="password" 
-          name="password" 
-          class="form-control" 
-          required 
-          placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
-          autocomplete="current-password"
-        >
+        <div style="position: relative; display: flex; align-items: center;">
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            class="form-control" 
+            required 
+            placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
+            autocomplete="current-password"
+            style="padding-right: 44px;"
+          >
+          <button 
+            type="button" 
+            id="togglePassword" 
+            aria-label="Toggle password visibility" 
+            style="position: absolute; right: 12px; background: transparent; border: none; color: #94a3b8; cursor: pointer; display: flex; align-items: center; padding: 4px;"
+          >
+            <svg id="eyeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
       </div>
 
-      <button type="submit" class="btn-download">
+      <button type="submit" class="btn-download" id="submitBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
         Download Excel (.csv)
       </button>
     </form>
 
-    <p class="info-note">
-      Exports all leads in UTF-8 BOM format. Fully compatible with Microsoft Excel &amp; Apple Numbers.
-    </p>
+    
   </div>
 
   <footer>
     &copy; <?php echo date('Y'); ?> <?php echo htmlspecialchars(PROJECT_NAME); ?>
   </footer>
+
+  <script>
+    // 1. Hide error alert immediately when user edits credentials or submits
+    const errorAlert = document.getElementById('error-alert');
+    const inputs = document.querySelectorAll('.form-control');
+    const form = document.getElementById('export-form');
+
+    inputs.forEach(input => {
+      input.addEventListener('input', () => {
+        if (errorAlert) {
+          errorAlert.style.display = 'none';
+        }
+      });
+    });
+
+    if (form) {
+      form.addEventListener('submit', () => {
+        if (errorAlert) {
+          errorAlert.style.display = 'none';
+        }
+      });
+    }
+
+    // 2. Toggle password visibility
+    const toggleBtn = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    const eyeIcon = document.getElementById('eyeIcon');
+
+    if (toggleBtn && passwordInput) {
+      toggleBtn.addEventListener('click', () => {
+        const isPassword = passwordInput.type === 'password';
+        passwordInput.type = isPassword ? 'text' : 'password';
+        eyeIcon.innerHTML = isPassword 
+          ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>'
+          : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+      });
+    }
+  </script>
 </body>
 </html>

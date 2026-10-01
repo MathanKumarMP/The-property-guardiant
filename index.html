@@ -21,7 +21,7 @@
       rel="stylesheet"
     />
     <link rel="icon" type="image/png" href="assets/logo-color.png" />
-    <link rel="stylesheet" href="css/styles.css?v=32.0" />
+    <link rel="stylesheet" href="css/styles.css?v=37.0" />
   </head>
 
   <body>
@@ -39,7 +39,12 @@
         <a href="#top" class="nav-brand">
           <img src="assets/logo-color.png" alt="The Property Guardian Logo" />
         </a>
-        <div class="nav-links">
+        <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle navigation" type="button">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <div class="nav-links" id="nav-links">
           <a href="#about" class="active">NRI Property Management</a>
           <a href="#services">Our Services</a>
           <a href="#why">Why Property Guardian</a>
@@ -47,6 +52,7 @@
           <a href="#testimonials">Testimonials</a>
           <a href="#contact" class="btn nav-contact-btn">CONTACT</a>
         </div>
+        <div class="nav-overlay" id="nav-overlay"></div>
       </nav>
       <div class="banner-hero-content">
         <div class="banner-hero-text">
@@ -1432,7 +1438,7 @@
       </div>
 
       <div class="footer-bottom wrap">
-        <p>&copy; 2026 The Property Guardian. All rights reserved.</p>
+        <p>&copy; 2026 The Property Guardian Home. All rights reserved.</p>
       </div>
     </footer>
 
@@ -1761,7 +1767,7 @@
       </div>
     </div>
 
-    <script src="js/main.js?v=9.0"></script>
+    <script src="js/main.js?v=10.0"></script>
   
     <!-- Banner Dots Auto & Click Script -->
     <script id="banner-dots-slider-script">

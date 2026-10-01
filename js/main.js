@@ -60,6 +60,53 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
+  // Mobile Navigation Drawer Toggle
+  var navHamburger = document.getElementById('nav-hamburger');
+  var mobileNavLinks = document.getElementById('nav-links');
+  var navOverlay = document.getElementById('nav-overlay');
+
+  function closeMobileNav() {
+    if (navHamburger) navHamburger.classList.remove('active');
+    if (mobileNavLinks) mobileNavLinks.classList.remove('nav-open');
+    if (navOverlay) navOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  function openMobileNav() {
+    if (navHamburger) navHamburger.classList.add('active');
+    if (mobileNavLinks) mobileNavLinks.classList.add('nav-open');
+    if (navOverlay) navOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  if (navHamburger && mobileNavLinks) {
+    navHamburger.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (mobileNavLinks.classList.contains('nav-open')) {
+        closeMobileNav();
+      } else {
+        openMobileNav();
+      }
+    });
+
+    if (navOverlay) {
+      navOverlay.addEventListener('click', closeMobileNav);
+    }
+
+    // Close when clicking any nav link
+    var allNavItems = mobileNavLinks.querySelectorAll('a');
+    allNavItems.forEach(function (link) {
+      link.addEventListener('click', closeMobileNav);
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && mobileNavLinks.classList.contains('nav-open')) {
+        closeMobileNav();
+      }
+    });
+  }
+
   // Scroll & Button Popup Modal Logic
   var propertyModal = document.getElementById('property-modal');
   var modalCloseBtn = document.getElementById('modal-close-btn');
