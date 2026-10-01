@@ -18,8 +18,8 @@ date_default_timezone_set('Asia/Kolkata');
 // 1. SET YOUR ADMIN CREDENTIALS HERE
 // -----------------------------------------------------------------------------
 define('PROJECT_NAME', 'The Property Guardian');
-define('ADMIN_EMAIL', 'admin@propertyguardian.com'); // Admin Email
-define('ADMIN_PASSWORD', 'Admin@2026');             // Admin Password
+define('ADMIN_EMAIL', 'crm@landsandlands.com'); // Admin Email
+define('ADMIN_PASSWORD', 'Landsandlands@1234');             // Admin Password
 define('DATA_FILE', __DIR__ . '/submissions.json');
 
 $errorMessage = '';
@@ -81,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         foreach ($reversed as $row) {
             $csvRow = [
                 $sno++,
-                $row['timestamp'] ?? (($row['date'] ?? '') . ' ' . ($row['time'] ?? '')),
+                trim(($row['date'] ?? '') . ' ' . ($row['time'] ?? '')) ?: ($row['timestamp'] ?? 'N/A'),
                 $row['name'] ?? 'N/A',
                 $row['phone'] ?? 'N/A',
                 $row['email'] ?? 'N/A',
@@ -260,6 +260,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       background: #1e293b;
     }
 
+    /* Custom Field Validation Error Styles */
+    .field-error {
+      display: none;
+      font-size: 12px;
+      color: #f87171;
+      margin-top: 6px;
+      font-weight: 500;
+      text-align: left;
+    }
+
+    .form-group.has-error .field-error {
+      display: block;
+      animation: fadeInError 0.2s ease;
+    }
+
+    .form-group.has-error .form-control {
+      border-color: #ef4444 !important;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
+      background: rgba(239, 68, 68, 0.08) !important;
+    }
+
+    @keyframes fadeInError {
+      from {
+        opacity: 0;
+        transform: translateY(-2px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     /* Download Excel Button */
     .btn-download {
       display: flex;
@@ -334,22 +366,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php endif; ?>
 
     <!-- Direct Download Form -->
-    <form method="POST" action="admin-export.php" id="export-form">
-      <div class="form-group">
+    <form method="POST" action="admin-export.php" id="export-form" novalidate>
+      <div class="form-group" id="fg-email">
         <label for="email">Email Address</label>
         <input 
           type="email" 
           id="email" 
           name="email" 
           class="form-control" 
-          required 
-          placeholder="admin@propertyguardian.com"
+          placeholder="Enter Your Email"
           value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>"
           autocomplete="username"
         >
+        <div class="field-error" id="email-error">Please enter a valid email address.</div>
       </div>
 
-      <div class="form-group">
+      <div class="form-group" id="fg-password">
         <label for="password">Password</label>
         <div style="position: relative; display: flex; align-items: center;">
           <input 
@@ -357,7 +389,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             id="password" 
             name="password" 
             class="form-control" 
-            required 
             placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
             autocomplete="current-password"
             style="padding-right: 44px;"
@@ -374,6 +405,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </svg>
           </button>
         </div>
+        <div class="field-error" id="password-error">Please enter your password.</div>
       </div>
 
       <button type="submit" class="btn-download" id="submitBtn">
@@ -390,33 +422,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </footer>
 
   <script>
-    // 1. Hide error alert immediately when user edits credentials or submits
     const errorAlert = document.getElementById('error-alert');
-    const inputs = document.querySelectorAll('.form-control');
     const form = document.getElementById('export-form');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const fgEmail = document.getElementById('fg-email');
+    const fgPassword = document.getElementById('fg-password');
+    const emailError = document.getElementById('email-error');
+    const passwordError = document.getElementById('password-error');
 
-    inputs.forEach(input => {
-      input.addEventListener('input', () => {
-        if (errorAlert) {
-          errorAlert.style.display = 'none';
-        }
+    function isValidEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    if (emailInput) {
+      emailInput.addEventListener('input', () => {
+        if (fgEmail) fgEmail.classList.remove('has-error');
+        if (errorAlert) errorAlert.style.display = 'none';
       });
-    });
+    }
+
+    if (passwordInput) {
+      passwordInput.addEventListener('input', () => {
+        if (fgPassword) fgPassword.classList.remove('has-error');
+        if (errorAlert) errorAlert.style.display = 'none';
+      });
+    }
 
     if (form) {
-      form.addEventListener('submit', () => {
-        if (errorAlert) {
-          errorAlert.style.display = 'none';
+      form.addEventListener('submit', (e) => {
+        let hasClientError = false;
+        const emailVal = emailInput ? emailInput.value.trim() : '';
+        const passwordVal = passwordInput ? passwordInput.value : '';
+
+        if (fgEmail) fgEmail.classList.remove('has-error');
+        if (fgPassword) fgPassword.classList.remove('has-error');
+
+        // Check Email
+        if (!emailVal) {
+          if (emailError) emailError.textContent = 'Please enter your email address.';
+          if (fgEmail) fgEmail.classList.add('has-error');
+          hasClientError = true;
+        } else if (!isValidEmail(emailVal)) {
+          if (emailError) emailError.textContent = 'Please enter a valid email address (e.g. name@domain.com).';
+          if (fgEmail) fgEmail.classList.add('has-error');
+          hasClientError = true;
+        }
+
+        // Check Password
+        if (!passwordVal) {
+          if (passwordError) passwordError.textContent = 'Please enter your password.';
+          if (fgPassword) fgPassword.classList.add('has-error');
+          hasClientError = true;
+        }
+
+        if (hasClientError) {
+          e.preventDefault();
+          if (errorAlert) errorAlert.style.display = 'none';
+          if (fgEmail && fgEmail.classList.contains('has-error')) {
+            emailInput.focus();
+          } else if (fgPassword && fgPassword.classList.contains('has-error')) {
+            passwordInput.focus();
+          }
         }
       });
     }
 
-    // 2. Toggle password visibility
+    // Toggle password visibility
     const toggleBtn = document.getElementById('togglePassword');
-    const passwordInput = document.getElementById('password');
     const eyeIcon = document.getElementById('eyeIcon');
 
-    if (toggleBtn && passwordInput) {
+    if (toggleBtn && passwordInput && eyeIcon) {
       toggleBtn.addEventListener('click', () => {
         const isPassword = passwordInput.type === 'password';
         passwordInput.type = isPassword ? 'text' : 'password';

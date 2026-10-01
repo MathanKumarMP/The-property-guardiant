@@ -25,10 +25,10 @@ define('PROJECT_NAME', 'The Property Guardian');
 // Go to Google Account -> Security -> 2-Step Verification -> App Passwords
 define('SMTP_HOST', 'ssl://smtp.gmail.com');
 define('SMTP_PORT', 465);
-define('SMTP_USER', 'your-email@gmail.com');          // Your Gmail address
-define('SMTP_PASS', 'xxxx xxxx xxxx xxxx');          // Your 16-digit Google App Password
+define('SMTP_USER', 'crm@landsandlands.com');          // Your Gmail address
+define('SMTP_PASS', 'krzy fcdq hthq pdxy');          // Your 16-digit Google App Password
 define('SMTP_FROM_NAME', 'The Property Guardian');   // Sender Name
-define('NOTIFICATION_EMAIL', 'your-email@gmail.com');// Where lead alerts are delivered
+define('NOTIFICATION_EMAIL', 'crm@landsandlands.com');// Where lead alerts are delivered
 
 // Local Storage Path
 define('DATA_FILE', __DIR__ . '/submissions.json');
@@ -145,8 +145,6 @@ $istTimestamp = date('Y-m-d H:i:s T'); // e.g. 2026-09-30 17:55:00 IST
 $ipAddress    = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'Unknown';
 
 $submissionRecord = [
-    'id'                => $submissionId,
-    'timestamp'         => $istTimestamp,
     'date'              => date('d-M-Y'),
     'time'              => date('h:i:s A'),
     'name'              => $fullName,
@@ -156,9 +154,7 @@ $submissionRecord = [
     'property_type'     => $propertyType,
     'owner_status'      => $ownerStatus,
     'preferred_contact' => $preferredMode,
-    'requirement'       => $requirement,
-    'ip_address'        => $ipAddress,
-    'user_agent'        => $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown'
+    'requirement'       => $requirement
 ];
 
 // -----------------------------------------------------------------------------
@@ -359,7 +355,7 @@ $htmlMessage = '
           <tr>
             <td style="padding: 20px 30px; background-color: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 12px; color: #94a3b8; text-align: center;">
               This notification was generated automatically by <strong>' . htmlspecialchars(PROJECT_NAME) . '</strong> system.<br/>
-              Client IP: ' . htmlspecialchars($ipAddress) . ' | Time: ' . htmlspecialchars($istTimestamp) . '
+              Time: ' . htmlspecialchars($istTimestamp) . '
             </td>
           </tr>
 
